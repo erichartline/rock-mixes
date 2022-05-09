@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Artist {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  genre String?
+  // Song Song[]
+  @@map("artists")
+}
+
+model Song {
+  id       Int    @id @default(autoincrement())
+  name     String
+  duration Float?
+  year     Int?
+  // artist   Artist? @relation(fields: [artistId], references: [id])
+  // artistId Int
+  @@map("songs")
+}
+
+model Mix {
+  id   Int       @id @default(autoincrement())
+  name String
+  date DateTime?
+  length String?
+  @@map("playlists")
+}
