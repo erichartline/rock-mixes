@@ -14,24 +14,29 @@ model Artist {
   id    Int     @id @default(autoincrement())
   name  String  @unique
   genre String?
-  // Song Song[]
+  songs Song[]
+
   @@map("artists")
 }
 
 model Song {
-  id       Int    @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   name     String
   duration Float?
   year     Int?
-  // artist   Artist? @relation(fields: [artistId], references: [id])
-  // artistId Int
+  artist   Artist? @relation(fields: [artistId], references: [id])
+  artistId Int
+  mixes    Mix[]
+
   @@map("songs")
 }
 
 model Mix {
-  id   Int       @id @default(autoincrement())
-  name String
-  date DateTime?
+  id     Int       @id @default(autoincrement())
+  name   String
+  date   String?
   length String?
-  @@map("playlists")
+
+  Song Song[]
+  @@map("mixes")
 }

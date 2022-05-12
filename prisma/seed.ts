@@ -11,6 +11,24 @@ type Row = {
   Song: string;
 };
 
+type SongWithMix = {
+  mix: string;
+  song: string;
+};
+
+type ArtistMap = {
+  // key = artist, value = list of songs
+  [key: string]: SongWithMix[];
+};
+
+type MixRow = {
+  Title: string;
+  Date: string;
+  Length: string;
+  URL: string;
+  Notes: string;
+};
+
 const clearTables = async () => {
   await prisma.artist.deleteMany({});
   await prisma.song.deleteMany({});
@@ -23,27 +41,45 @@ const uniqueArray = (list) =>
   );
 
 const seedTracks = async () => {
-  let data: Row[] = [];
+  let artists: ArtistMap = {};
 
   fs.createReadStream("data/tracks.csv")
     .pipe(csv.parse({ headers: true }))
-    .on("data", (row: Row) => {
-      data.push(row);
+    .on("data", async (row: Row) => {
+      if (artists[row["Artist"]]) {
+        artists[row["Artist"]].push({ mix: row["Title"], song: row["Song"] });
+      } else {
+        artists[row["Artist"]] = [{ mix: row["Title"], song: row["Song"] }];
+      }
     })
     .on("end", async () => {
-      const artists = data.map((item) => ({
-        name: item["Artist"],
-      }));
-      const songs = data.map((item) => ({
-        name: item["Song"],
-      }));
-
       try {
-        await clearTables();
-        await prisma.artist.createMany({
-          data: uniqueArray(artists),
-          skipDuplicates: true,
-        });
+        for (const [key, value] of Object.entries(artists)) {
+          await prisma.artist.create({
+            data: {
+              name: key,
+              songs: {
+                create: value.map((item) => ({
+                  name: item.song,
+                  mixes: {
+                    create: [
+                      {
+                        name: item.mix,
+                      },
+                    ],
+                  },
+                })),
+              },
+            },
+            include: {
+              songs: {
+                include: {
+                  mixes: true,
+                },
+              },
+            },
+          });
+        }
       } catch (error) {
         console.error(error);
         process.exit(1);
@@ -54,23 +90,23 @@ const seedTracks = async () => {
 };
 
 const seedMixes = async () => {
-  let data: Row[] = [];
+  let data: MixRow[] = [];
 
   fs.createReadStream("data/mixes.csv")
     .pipe(csv.parse({ headers: true }))
-    .on("data", (row: Row) => {
+    .on("data", (row: MixRow) => {
       data.push(row);
     })
     .on("end", async () => {
-      const mixes = data.map((item) => ({
-        name: item["Title"],
-      }));
-
       try {
-        await clearTables();
-        await prisma.mix.createMany({
-          data: uniqueArray(mixes),
-          skipDuplicates: true,
+        data.forEach(async (mix) => {
+          await prisma.mix.create({
+            data: {
+              name: mix["Title"],
+              date: mix["Date"],
+              length: mix["Length"],
+            },
+          });
         });
       } catch (error) {
         console.error(error);
@@ -81,5 +117,6 @@ const seedMixes = async () => {
     });
 };
 
+clearTables();
 seedMixes();
 seedTracks();
