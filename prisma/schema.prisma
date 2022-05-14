@@ -15,6 +15,7 @@ model Artist {
   name  String  @unique
   genre String?
   songs Song[]
+  mixes Mix[]
 
   @@map("artists")
 }
@@ -32,11 +33,14 @@ model Song {
 }
 
 model Mix {
-  id     Int       @id @default(autoincrement())
-  name   String
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
   date   String?
   length String?
+  url    String?
+  notes  String?
 
-  Song Song[]
+  Song   Song[]
+  Artist Artist[]
   @@map("mixes")
 }
