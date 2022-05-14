@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:prepare": "npx prisma format && npx prisma generate && npx prisma db push",
-    "db:seed": "npx prisma db seed"
+    "db:seed": "npx prisma db seed",
+    "studio": "npx prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^3.13.0",
