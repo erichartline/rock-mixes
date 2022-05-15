@@ -45,7 +45,11 @@ export async function getStaticProps({ params }) {
       id: Number(params.id),
     },
     include: {
-      Song: true,
+      songs: {
+        include: {
+          artist: true,
+        },
+      },
     },
   });
 
