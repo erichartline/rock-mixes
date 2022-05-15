@@ -4,21 +4,22 @@ import * as csv from "fast-csv";
 
 const prisma = new PrismaClient();
 
-type Row = {
+type TracksRow = {
   Title: string;
   Track: string;
   Artist: string;
   Song: string;
 };
 
-type SongWithMix = {
-  mix: string;
-  song: string;
-};
-
-type ArtistMap = {
-  // key = artist, value = list of songs
-  [key: string]: SongWithMix[];
+type MixMap = {
+  /** mix name */
+  [name: string]: {
+    /** track number */
+    [trackNumber: number]: {
+      /** artist: song */
+      [artist: string]: string;
+    };
+  };
 };
 
 type MixRow = {
@@ -39,47 +40,61 @@ const clearTables = async () => {
 };
 
 const seedTracks = async () => {
-  let artists: ArtistMap = {};
+  let mixes: MixMap = {};
 
   return new Promise((resolve, reject) => {
     createReadStream("data/tracks.csv")
       .pipe(csv.parse({ headers: true }))
-      .on("data", async (row: Row) => {
-        if (artists[row["Artist"]]) {
-          artists[row["Artist"]].push({ mix: row["Title"], song: row["Song"] });
+      .on("data", async (row: TracksRow) => {
+        const title = row["Title"];
+        const track = row["Track"];
+        const artist = row["Artist"];
+        const song = row["Song"];
+        if (mixes[title]) {
+          mixes[title][track] = {
+            [artist]: song,
+          };
         } else {
-          artists[row["Artist"]] = [{ mix: row["Title"], song: row["Song"] }];
+          mixes[title] = {
+            [track]: {
+              [artist]: song,
+            },
+          };
         }
       })
       .on("end", async () => {
         try {
-          for (const [key, value] of Object.entries(artists)) {
-            await prisma.artist.create({
-              data: {
-                name: key,
-                songs: {
-                  create: value.map((item) => ({
-                    name: item.song,
-                    mixes: {
-                      connect: { name: item.mix },
+          for (const [key, value] of Object.entries(mixes)) {
+            const mixName = key;
+            for (const [trackKey, trackValue] of Object.entries(value)) {
+              await prisma.song.create({
+                data: {
+                  name: Object.values(trackValue)[0],
+                  trackNumber: Number(trackKey),
+                  mixes: {
+                    connect: { name: mixName },
+                  },
+                  artist: {
+                    connectOrCreate: {
+                      where: {
+                        name: Object.keys(trackValue)[0],
+                      },
+                      create: {
+                        name: Object.keys(trackValue)[0],
+                      },
                     },
-                  })),
-                },
-                mixes: {
-                  connect: value.map((item) => ({
-                    name: item.mix,
-                  })),
-                },
-              },
-              include: {
-                songs: {
-                  include: {
-                    mixes: true,
                   },
                 },
-                mixes: true,
-              },
-            });
+                include: {
+                  mixes: {
+                    include: {
+                      artists: true,
+                    },
+                  },
+                  artist: true,
+                },
+              });
+            }
           }
           console.log("successfully loaded artists and songs...");
           resolve(true);

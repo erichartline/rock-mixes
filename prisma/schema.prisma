@@ -21,13 +21,14 @@ model Artist {
 }
 
 model Song {
-  id       Int     @id @default(autoincrement())
-  name     String
-  duration Float?
-  year     Int?
-  artist   Artist? @relation(fields: [artistId], references: [id])
-  artistId Int
-  mixes    Mix[]
+  id          Int     @id @default(autoincrement())
+  name        String
+  duration    Float?
+  year        Int?
+  artist      Artist? @relation(fields: [artistId], references: [id])
+  artistId    Int
+  mixes       Mix[]
+  trackNumber Int
 
   @@map("songs")
 }
