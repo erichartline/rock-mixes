@@ -2,44 +2,43 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export default function Mix({ mix }) {
-  console.log(mix);
+const Mix = ({ mix }) => {
   return (
     <div>
       <main>
         <h1>{mix.name}</h1>
+        <div>Created on {mix.date ? mix.date : "Unknown"}</div>
+        <div>Length: {mix.length}</div>
         <div>
-          {/* {mixes.map((mix) => (
-            <div key={mix.id}>
-              <Link href={`/mix/${mix.id}`}>{mix.name}</Link>
+          {mix.songs.map((song) => (
+            <div key={song.title}>
+              {song.trackNumber}) {song.artist} - {song.title}
             </div>
-          ))} */}
+          ))}
         </div>
       </main>
     </div>
   );
-}
+};
 
-export async function getStaticPaths() {
-  // Fetch existing posts from the database
+export const getStaticPaths = async () => {
   const mixes = await prisma.mix.findMany({
     select: {
       id: true,
     },
   });
 
-  // Get the paths we want to pre-render based on posts
   const paths = mixes.map((mix) => ({
     params: { id: String(mix.id) },
   }));
 
   return {
     paths,
-    // If an ID is requested that isn't defined here, fallback will incrementally generate the page
     fallback: true,
   };
-}
-export async function getStaticProps({ params }) {
+};
+
+export const getStaticProps = async ({ params }) => {
   const mix = await prisma.mix.findUnique({
     where: {
       id: Number(params.id),
@@ -54,6 +53,17 @@ export async function getStaticProps({ params }) {
   });
 
   return {
-    props: { mix },
+    props: {
+      mix: {
+        ...mix,
+        songs: mix.songs.map((song) => ({
+          title: song.name,
+          artist: song.artist.name,
+          trackNumber: song.trackNumber,
+        })),
+      },
+    },
   };
-}
+};
+
+export default Mix;
