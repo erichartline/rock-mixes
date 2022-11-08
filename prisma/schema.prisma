@@ -12,6 +12,8 @@ datasource db {
 
 model Artist {
   id    Int     @id @default(autoincrement())
+  // createdAt DateTime @default(now())
+  // updatedAt DateTime @updatedAt
   name  String  @unique
   genre String?
   songs Song[]
@@ -22,6 +24,8 @@ model Artist {
 
 model Song {
   id          Int     @id @default(autoincrement())
+  // createdAt   DateTime @default(now())
+  // updatedAt   DateTime @updatedAt
   name        String
   duration    Float?
   year        Int?
@@ -35,6 +39,8 @@ model Song {
 
 model Mix {
   id     Int     @id @default(autoincrement())
+  // createdAt DateTime @default(now())
+  // updatedAt DateTime @updatedAt
   name   String  @unique
   date   String?
   length String?
@@ -43,5 +49,6 @@ model Mix {
 
   songs   Song[]
   artists Artist[]
+
   @@map("mixes")
 }
