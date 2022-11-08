@@ -6,7 +6,6 @@ import {
   Table,
   Thead,
   Tbody,
-  Text,
   Tr,
   Th,
   Td,
@@ -21,7 +20,7 @@ const Homepage = ({ mixes }) => {
       <Head>
         <title>Rock Mixes</title>
         <meta name="description" content="List of rock mixes" />
-        <link rel="icon" href="/favicon.ico" />
+        {/* <link rel="icon" href="/favicon.ico" /> */}
       </Head>
       <Center py="10">
         <Flex direction="column" justify="center" align="center">
