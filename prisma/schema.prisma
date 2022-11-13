@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,44 +8,61 @@ datasource db {
 }
 
 model Artist {
-  id    Int     @id @default(autoincrement())
-  // createdAt DateTime @default(now())
-  // updatedAt DateTime @updatedAt
-  name  String  @unique
-  genre String?
-  songs Song[]
-  mixes Mix[]
-
-  @@map("artists")
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  name      String     @unique
+  genres    Genre[]
+  songs     Song[]
+  playlists Playlist[]
+  album     Album?     @relation(fields: [albumId], references: [id])
+  albumId   Int?
 }
 
 model Song {
-  id          Int     @id @default(autoincrement())
-  // createdAt   DateTime @default(now())
-  // updatedAt   DateTime @updatedAt
-  name        String
-  duration    Float?
-  year        Int?
-  artist      Artist? @relation(fields: [artistId], references: [id])
-  artistId    Int
-  mixes       Mix[]
-  trackNumber Int
-
-  @@map("songs")
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  name      String
+  duration  Int
+  year      DateTime
+  artists   Artist[]
+  playlists Playlist[]
+  album     Album?     @relation(fields: [albumId], references: [id])
+  albumId   Int?
+  // trackNumber Int
 }
 
-model Mix {
-  id     Int     @id @default(autoincrement())
-  // createdAt DateTime @default(now())
-  // updatedAt DateTime @updatedAt
-  name   String  @unique
-  date   String?
-  length String?
-  url    String?
-  notes  String?
+model Playlist {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  name       String   @unique
+  date       DateTime
+  duration   Int
+  spotifyURL String
+  notes      String
+  songs      Song[]
+  artists    Artist[]
+  album      Album?   @relation(fields: [albumId], references: [id])
+  albumId    Int?
+}
 
-  songs   Song[]
-  artists Artist[]
+model Genre {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String   @unique
+  artist    Artist?  @relation(fields: [artistId], references: [id])
+  artistId  Int?
+}
 
-  @@map("mixes")
+model Album {
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  name      String
+  artists   Artist[]
+  songs     Song[]
+  playlists Playlist[]
 }
