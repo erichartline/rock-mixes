@@ -12,25 +12,25 @@ model Artist {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   name      String     @unique
-  genres    Genre[]
-  songs     Song[]
-  playlists Playlist[]
-  album     Album?     @relation(fields: [albumId], references: [id])
   albumId   Int?
+  album     Album?     @relation(fields: [albumId], references: [id])
+  genres    Genre[]
+  playlists Playlist[]
+  songs     Song[]
 }
 
 model Song {
-  id        Int        @id @default(autoincrement())
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  name      String
-  duration  Int
-  year      DateTime
-  artists   Artist[]
-  playlists Playlist[]
-  album     Album?     @relation(fields: [albumId], references: [id])
-  albumId   Int?
-  // trackNumber Int
+  id         Int        @id @default(autoincrement())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  name       String
+  duration   Int
+  year       DateTime
+  spotifyURL String
+  albumId    Int?
+  album      Album?     @relation(fields: [albumId], references: [id])
+  artists    Artist[]
+  playlists  Playlist[]
 }
 
 model Playlist {
@@ -38,14 +38,14 @@ model Playlist {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   name       String   @unique
-  date       DateTime
-  duration   Int
+  date       String
+  duration   String
   spotifyURL String
   notes      String
-  songs      Song[]
-  artists    Artist[]
-  album      Album?   @relation(fields: [albumId], references: [id])
   albumId    Int?
+  album      Album?   @relation(fields: [albumId], references: [id])
+  artists    Artist[]
+  songs      Song[]
 }
 
 model Genre {
@@ -53,8 +53,8 @@ model Genre {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name      String   @unique
-  artist    Artist?  @relation(fields: [artistId], references: [id])
   artistId  Int?
+  artist    Artist?  @relation(fields: [artistId], references: [id])
 }
 
 model Album {
@@ -62,7 +62,8 @@ model Album {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   name      String
+  year      DateTime
   artists   Artist[]
-  songs     Song[]
   playlists Playlist[]
+  songs     Song[]
 }
