@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "next/link"
 import {
   Button,
   Center,
@@ -12,19 +12,17 @@ import {
   Th,
   Td,
   TableContainer,
-} from "@chakra-ui/react";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+} from "@chakra-ui/react"
+import prisma from "../../lib/prisma"
 
 const Mix = ({ mix }) => {
   return (
     <Center py="10">
       <Flex direction="column" justify="center" align="center">
+        <Link href="/">
+          <Button size="sm">Back</Button>
+        </Link>
         <Flex justify="center" align="center">
-          <Link href="/">
-            <Button size="sm">Back</Button>
-          </Link>
           <Heading as="h1" size="xl">
             {mix.name}
           </Heading>
@@ -53,25 +51,25 @@ const Mix = ({ mix }) => {
         </TableContainer>
       </Flex>
     </Center>
-  );
-};
+  )
+}
 
 export const getStaticPaths = async () => {
   const mixes = await prisma.mix.findMany({
     select: {
       id: true,
     },
-  });
+  })
 
   const paths = mixes.map((mix) => ({
     params: { id: String(mix.id) },
-  }));
+  }))
 
   return {
     paths,
     fallback: true,
-  };
-};
+  }
+}
 
 export const getStaticProps = async ({ params }) => {
   const mix = await prisma.mix.findUnique({
@@ -85,7 +83,7 @@ export const getStaticProps = async ({ params }) => {
         },
       },
     },
-  });
+  })
 
   return {
     props: {
@@ -98,7 +96,7 @@ export const getStaticProps = async ({ params }) => {
         })),
       },
     },
-  };
-};
+  }
+}
 
-export default Mix;
+export default Mix

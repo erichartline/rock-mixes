@@ -11,8 +11,8 @@ import {
   Td,
   TableContainer,
 } from "@chakra-ui/react"
-import { PrismaClient } from "@prisma/client"
 import Link from "next/link"
+import prisma from "../lib/prisma"
 
 const Homepage = ({ mixes }) => {
   return (
@@ -20,7 +20,6 @@ const Homepage = ({ mixes }) => {
       <Head>
         <title>Rock Mixes</title>
         <meta name="description" content="List of rock mixes" />
-        {/* <link rel="icon" href="/favicon.ico" /> */}
       </Head>
       <Center py="10">
         <Flex direction="column" justify="center" align="center">
@@ -56,8 +55,6 @@ const Homepage = ({ mixes }) => {
 }
 
 export async function getStaticProps() {
-  const prisma = new PrismaClient()
-
   const mixes = await prisma.mix.findMany()
 
   return {
