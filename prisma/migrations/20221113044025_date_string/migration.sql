@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Playlist" ALTER COLUMN "date" SET DATA TYPE TEXT;

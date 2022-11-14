@@ -54,8 +54,8 @@ const Homepage = ({ mixes }) => {
   )
 }
 
-export async function getStaticProps() {
-  const mixes = await prisma.mix.findMany()
+export const getServerSideProps = async () => {
+  const mixes = await prisma.playlist.findMany()
 
   return {
     props: { mixes },
