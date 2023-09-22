@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react"
 import prisma from "../../lib/prisma"
 
-const Mix = ({ mix }) => {
+const Playlist = ({ playlist }) => {
   return (
     <Center py="10">
       <Flex direction="column" justify="center" align="center">
@@ -24,11 +24,14 @@ const Mix = ({ mix }) => {
         </Link>
         <Flex justify="center" align="center">
           <Heading as="h1" size="xl">
-            {mix.name}
+            {playlist.name}
           </Heading>
         </Flex>
-        <Text>Created on {mix.date ? mix.date : "???"}</Text>
-        <Text>Length: {mix.length}</Text>
+        <Text>
+          Created on{" "}
+          {playlist.date ? new Date(playlist.date).getFullYear() : "???"}
+        </Text>
+        <Text>Length: {playlist.length}</Text>
         <TableContainer>
           <Table variant="striped" colorScheme="gray">
             <Thead>
@@ -39,7 +42,7 @@ const Mix = ({ mix }) => {
               </Tr>
             </Thead>
             <Tbody>
-              {mix.songs.map((song) => (
+              {playlist.songs.map((song) => (
                 <Tr key={song.title}>
                   <Td>{song.trackNumber}</Td>
                   <Td>{song.artist}</Td>
@@ -55,14 +58,14 @@ const Mix = ({ mix }) => {
 }
 
 export const getStaticPaths = async () => {
-  const mixes = await prisma.mix.findMany({
+  const playlistes = await prisma.playlist.findMany({
     select: {
       id: true,
     },
   })
 
-  const paths = mixes.map((mix) => ({
-    params: { id: String(mix.id) },
+  const paths = playlistes.map((playlist) => ({
+    params: { id: String(playlist.id) },
   }))
 
   return {
@@ -72,7 +75,7 @@ export const getStaticPaths = async () => {
 }
 
 export const getStaticProps = async ({ params }) => {
-  const mix = await prisma.mix.findUnique({
+  const playlist = await prisma.playlist.findUnique({
     where: {
       id: Number(params.id),
     },
@@ -87,16 +90,17 @@ export const getStaticProps = async ({ params }) => {
 
   return {
     props: {
-      mix: {
-        ...mix,
-        songs: mix.songs.map((song) => ({
+      playlist: {
+        ...playlist,
+        date: playlist.date ? playlist.date.toString() : null,
+        songs: playlist.songs.map((song) => ({
           title: song.name,
           artist: song.artist.name,
-          trackNumber: song.trackNumber,
+          trackNumber: song.track,
         })),
       },
     },
   }
 }
 
-export default Mix
+export default Playlist

@@ -14,7 +14,7 @@ import {
 import Link from "next/link"
 import prisma from "../lib/prisma"
 
-const Homepage = ({ mixes }) => {
+const Homepage = ({ playlists }) => {
   return (
     <>
       <Head>
@@ -36,13 +36,20 @@ const Homepage = ({ mixes }) => {
                 </Tr>
               </Thead>
               <Tbody>
-                {mixes.map((mix) => (
-                  <Tr key={mix.id}>
+                {playlists.map((playlist) => (
+                  <Tr key={playlist.id}>
                     <Td>
-                      <Link href={`/mix/${mix.id}`}>{mix.name}</Link>
+                      <Link href={`/playlist/${playlist.id}`}>
+                        {playlist.name}
+                      </Link>
                     </Td>
-                    <Td>{mix.date}</Td>
-                    <Td>{mix.length}</Td>
+                    <Td>
+                      {" "}
+                      {playlist.date
+                        ? new Date(playlist.date).getFullYear()
+                        : "???"}
+                    </Td>
+                    <Td>{playlist.duration}</Td>
                   </Tr>
                 ))}
               </Tbody>
@@ -55,10 +62,14 @@ const Homepage = ({ mixes }) => {
 }
 
 export async function getStaticProps() {
-  const mixes = await prisma.mix.findMany()
+  const playlists = await prisma.playlist.findMany()
+  const playlistsWithDate = playlists.map((list) => ({
+    ...list,
+    date: list.date ? list.date.toString() : "",
+  }))
 
   return {
-    props: { mixes },
+    props: { playlists: playlistsWithDate },
   }
 }
 
