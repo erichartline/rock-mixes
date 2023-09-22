@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PrismaClient } from "@prisma/client"
 import fs from "fs"
 import csv from "csv-parser"
@@ -36,6 +37,7 @@ async function populateDatabase(mixesPath: string, tracksPath: string) {
       duration: mix.Duration,
       notes: mix.Notes,
       url: mix.URL,
+      date: "",
     }
 
     if (mix.Date) {

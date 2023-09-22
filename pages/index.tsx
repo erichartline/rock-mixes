@@ -13,8 +13,13 @@ import {
 } from "@chakra-ui/react"
 import Link from "next/link"
 import prisma from "../lib/prisma"
+import { Playlist } from "@prisma/client"
 
-const Homepage = ({ playlists }) => {
+type Props = {
+  playlists: Playlist[]
+}
+
+const Homepage = ({ playlists }: Props) => {
   return (
     <>
       <Head>

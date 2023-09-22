@@ -14,8 +14,20 @@ import {
   TableContainer,
 } from "@chakra-ui/react"
 import prisma from "../../lib/prisma"
+import { Playlist, Song } from "@prisma/client"
+import { GetStaticProps } from "next"
 
-const Playlist = ({ playlist }) => {
+type Props = {
+  playlist: Playlist & {
+    songs: {
+      title: string
+      artist: string
+      trackNumber: number
+    }[]
+  }
+}
+
+const Playlist = ({ playlist }: Props) => {
   return (
     <Center py="10">
       <Flex direction="column" justify="center" align="center">
@@ -31,7 +43,7 @@ const Playlist = ({ playlist }) => {
           Created on{" "}
           {playlist.date ? new Date(playlist.date).getFullYear() : "???"}
         </Text>
-        <Text>Length: {playlist.length}</Text>
+        <Text>Length: {playlist.duration}</Text>
         <TableContainer>
           <Table variant="striped" colorScheme="gray">
             <Thead>
@@ -43,7 +55,7 @@ const Playlist = ({ playlist }) => {
             </Thead>
             <Tbody>
               {playlist.songs.map((song) => (
-                <Tr key={song.title}>
+                <Tr key={`${song.trackNumber}-${song.title}`}>
                   <Td>{song.trackNumber}</Td>
                   <Td>{song.artist}</Td>
                   <Td>{song.title}</Td>
@@ -74,7 +86,7 @@ export const getStaticPaths = async () => {
   }
 }
 
-export const getStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps = async ({ params }) => {
   const playlist = await prisma.playlist.findUnique({
     where: {
       id: Number(params.id),
