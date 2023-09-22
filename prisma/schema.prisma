@@ -1,54 +1,58 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+model Playlist {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  date     DateTime? // This assumes date is optional
+  duration String
+  notes    String?
+  url      String?
+  songs    Song[]
 }
 
 model Artist {
   id    Int     @id @default(autoincrement())
-  // createdAt DateTime @default(now())
-  // updatedAt DateTime @updatedAt
   name  String  @unique
-  genre String?
   songs Song[]
-  mixes Mix[]
-
-  @@map("artists")
+  Album Album[]
 }
 
 model Song {
-  id          Int     @id @default(autoincrement())
-  // createdAt   DateTime @default(now())
-  // updatedAt   DateTime @updatedAt
-  name        String
-  duration    Float?
-  year        Int?
-  artist      Artist? @relation(fields: [artistId], references: [id])
-  artistId    Int
-  mixes       Mix[]
-  trackNumber Int
-
-  @@map("songs")
+  id         Int      @id @default(autoincrement())
+  track      Int // Track number
+  name       String // Name of the song
+  duration   String
+  url        String?
+  album      Album?   @relation(fields: [albumId], references: [id])
+  albumId    Int?
+  artist     Artist   @relation(fields: [artistId], references: [id])
+  artistId   Int
+  genre      Genre    @relation(fields: [genreId], references: [id])
+  genreId    Int
+  playlist   Playlist @relation(fields: [playlistId], references: [id])
+  playlistId Int
 }
 
-model Mix {
-  id     Int     @id @default(autoincrement())
-  // createdAt DateTime @default(now())
-  // updatedAt DateTime @updatedAt
-  name   String  @unique
-  date   String?
-  length String?
-  url    String?
-  notes  String?
+model Album {
+  id       Int    @id @default(autoincrement())
+  name     String
+  year     Int?
+  artist   Artist @relation(fields: [artistId], references: [id])
+  artistId Int
+  songs    Song[]
 
-  songs   Song[]
-  artists Artist[]
+  @@unique([name, artistId])
+}
 
-  @@map("mixes")
+model Genre {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  songs Song[]
 }

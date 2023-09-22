@@ -1,151 +1,118 @@
-import { PrismaClient } from "@prisma/client";
-import { createReadStream } from "fs";
-import * as csv from "fast-csv";
+import { PrismaClient } from "@prisma/client"
+import fs from "fs"
+import csv from "csv-parser"
 
-const prisma = new PrismaClient();
+function formatDate(input: string) {
+  const [month, day, year] = input.split("/")
+  return new Date(`${year}-${month}-${day}`).toISOString()
+}
 
-type TracksRow = {
-  Title: string;
-  Track: string;
-  Artist: string;
-  Song: string;
-};
+async function processCSV(filePath: string, processFunction) {
+  return new Promise<void>((resolve, reject) => {
+    const items = []
 
-type MixMap = {
-  /** mix name */
-  [name: string]: {
-    /** track number */
-    [trackNumber: number]: {
-      /** artist: song */
-      [artist: string]: string;
-    };
-  };
-};
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on("data", (data) => items.push(data))
+      .on("end", async () => {
+        try {
+          for (const item of items) {
+            await processFunction(item)
+          }
+          resolve()
+        } catch (error) {
+          reject(error)
+        }
+      })
+  })
+}
 
-type MixRow = {
-  Title: string;
-  Date: string;
-  Length: string;
-  URL: string;
-  Notes: string;
-};
+const prisma = new PrismaClient()
 
-const clearTables = async () => {
-  await prisma.mix.deleteMany({});
-  console.log("successfully cleared mix table...");
-  await prisma.song.deleteMany({});
-  console.log("successfully cleared song table...");
-  await prisma.artist.deleteMany({});
-  console.log("successfully cleared artist table...");
-};
+async function populateDatabase(mixesPath: string, tracksPath: string) {
+  await processCSV(mixesPath, async (mix) => {
+    const playlistData = {
+      name: mix.Name,
+      duration: mix.Duration,
+      notes: mix.Notes,
+      url: mix.URL,
+    }
 
-const seedTracks = async () => {
-  let mixes: MixMap = {};
+    if (mix.Date) {
+      playlistData["date"] = formatDate(mix.Date)
+    }
 
-  return new Promise((resolve, reject) => {
-    createReadStream("data/tracks.csv")
-      .pipe(csv.parse({ headers: true }))
-      .on("data", async (row: TracksRow) => {
-        const title = row["Title"];
-        const track = row["Track"];
-        const artist = row["Artist"];
-        const song = row["Song"];
-        if (mixes[title]) {
-          mixes[title][track] = {
-            [artist]: song,
-          };
-        } else {
-          mixes[title] = {
-            [track]: {
-              [artist]: song,
+    const createdPlaylist = await prisma.playlist.create({
+      data: playlistData,
+    })
+    console.log(`Created playlist: ${createdPlaylist.name}`)
+  })
+
+  await processCSV(tracksPath, async (track) => {
+    // 1. Ensure the artist exists
+    let artist = await prisma.artist.findFirst({
+      where: { name: track.Artist },
+    })
+
+    // 2. If the artist doesn't exist, create it
+    if (!artist) {
+      artist = await prisma.artist.create({
+        data: { name: track.Artist },
+      })
+    }
+
+    const songData = {
+      track: parseInt(track["Track #"]),
+      name: track.Song,
+      duration: track.Duration,
+      url: track.URL,
+      artist: {
+        connectOrCreate: {
+          where: { name: track.Artist },
+          create: { name: track.Artist },
+        },
+      },
+      genre: {
+        connectOrCreate: {
+          where: { name: track.Genre },
+          create: { name: track.Genre },
+        },
+      },
+      playlist: {
+        connect: {
+          name: track["Playlist Name"],
+        },
+      },
+      album: {
+        connectOrCreate: {
+          where: {
+            name_artistId: {
+              name: track.Album,
+              artistId: artist?.id, // Use the found artist's ID here
             },
-          };
-        }
-      })
-      .on("end", async () => {
-        try {
-          for (const [key, value] of Object.entries(mixes)) {
-            const mixName = key;
-            for (const [trackKey, trackValue] of Object.entries(value)) {
-              await prisma.song.create({
-                data: {
-                  name: Object.values(trackValue)[0],
-                  trackNumber: Number(trackKey),
-                  mixes: {
-                    connect: { name: mixName },
-                  },
-                  artist: {
-                    connectOrCreate: {
-                      where: {
-                        name: Object.keys(trackValue)[0],
-                      },
-                      create: {
-                        name: Object.keys(trackValue)[0],
-                      },
-                    },
-                  },
-                },
-                include: {
-                  mixes: {
-                    include: {
-                      artists: true,
-                    },
-                  },
-                  artist: true,
-                },
-              });
-            }
-          }
-          console.log("successfully loaded artists and songs...");
-          resolve(true);
-        } catch (error) {
-          console.error(error);
-          reject(error);
-          process.exit(1);
-        } finally {
-          await prisma.$disconnect();
-        }
-      });
-  });
-};
-
-const seedMixes = async () => {
-  let mixes: MixRow[] = [];
-
-  return new Promise((resolve, reject) => {
-    createReadStream("data/mixes.csv")
-      .pipe(csv.parse({ headers: true }))
-      .on("data", (row: MixRow) => {
-        mixes.push(row);
-      })
-      .on("end", async () => {
-        try {
-          for (const mix of mixes) {
-            await prisma.mix.create({
-              data: {
-                name: mix["Title"],
-                date: mix["Date"],
-                length: mix["Length"],
+          },
+          create: {
+            name: track.Album,
+            artist: {
+              connect: {
+                name: track.Artist,
               },
-            });
-          }
-          console.log("successfully loaded mixes...");
-          resolve(true);
-        } catch (error) {
-          console.error(error);
-          reject(error);
-          process.exit(1);
-        } finally {
-          await prisma.$disconnect();
-        }
-      });
-  });
-};
+            },
+          },
+        },
+      },
+    }
+    console.log(
+      `Creating song: ${track.Song} for playlist: ${track["Playlist Name"]}`,
+    )
+    await prisma.song.create({
+      data: songData,
+    })
+  })
 
-const run = async () => {
-  await clearTables();
-  await seedMixes();
-  await seedTracks();
-};
+  await prisma.$disconnect()
+}
 
-run();
+const mixesPath = "data/mixes.csv"
+const tracksPath = "data/tracks.csv"
+populateDatabase(mixesPath, tracksPath)
