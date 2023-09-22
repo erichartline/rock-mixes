@@ -19,6 +19,7 @@ import { GetStaticProps } from "next"
 
 type Props = {
   playlist: Playlist & {
+    date: string
     songs: {
       title: string
       artist: string
@@ -28,6 +29,10 @@ type Props = {
 }
 
 const Playlist = ({ playlist }: Props) => {
+  if (!playlist) {
+    return null
+  }
+
   return (
     <Center py="10">
       <Flex direction="column" justify="center" align="center">
