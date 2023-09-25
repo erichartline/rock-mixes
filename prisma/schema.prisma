@@ -18,10 +18,11 @@ model Playlist {
 }
 
 model Artist {
-  id    Int     @id @default(autoincrement())
-  name  String  @unique
-  songs Song[]
-  Album Album[]
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  songs  Song[]
+  albums Album[]
+  genres Genre[] @relation("ArtistToGenre")
 }
 
 model Song {
@@ -52,7 +53,8 @@ model Album {
 }
 
 model Genre {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  songs Song[]
+  id      Int      @id @default(autoincrement())
+  name    String   @unique
+  songs   Song[]
+  artists Artist[] @relation("ArtistToGenre")
 }
