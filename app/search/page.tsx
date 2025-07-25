@@ -7,6 +7,7 @@ import {
   Filter,
   Sparkles,
   BarChart3,
+  Play,
 } from "lucide-react"
 import { SearchWrapper } from "@/components/search-wrapper"
 import { Button } from "@/components/ui/button"
@@ -146,17 +147,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       </section>
 
       {/* Results Section */}
-      <section className="container mx-auto px-4 py-8">
+      <section className="max-w-7xl mx-auto px-3 py-4">
         {query ? (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Playlists Results */}
             {results.playlists.length > 0 && (
               <div>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Disc className="w-5 h-5 text-primary" />
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 rounded bg-primary/10">
+                    <Disc className="w-4 h-4 text-primary" />
                   </div>
-                  <h2 className="text-2xl font-bold font-outfit">
+                  <h2 className="text-lg font-bold">
                     Playlists
                     <span className="ml-2 text-sm font-normal text-muted-foreground">
                       ({results.playlists.length})
@@ -164,38 +165,33 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                   {results.playlists.map((playlist) => (
                     <Link key={playlist.id} href={`/playlist/${playlist.id}`}>
-                      <Card className="card-hover group">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
-                                <Music className="w-5 h-5 text-white" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <CardTitle className="text-lg group-hover:text-primary transition-colors truncate">
-                                  {playlist.name}
-                                </CardTitle>
-                                <CardDescription>
-                                  {playlist.date
-                                    ? formatDate(playlist.date)
-                                    : "Unknown date"}
-                                </CardDescription>
-                              </div>
+                      <div className="group relative rounded bg-card border border-border hover:bg-muted/30 transition-colors">
+                        <div className="p-2 flex items-center gap-2">
+                          <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Music className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-foreground group-hover:text-primary transition-colors truncate text-sm">
+                              {playlist.name}
+                            </h3>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>{playlist.duration || "Unknown"}</span>
+                              {playlist.date && (
+                                <span>{formatDate(playlist.date)}</span>
+                              )}
                             </div>
                           </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Music className="w-4 h-4" />
-                            <span>
-                              {playlist.duration || "Unknown duration"}
-                            </span>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Play
+                              className="w-3 h-3 text-primary"
+                              fill="currentColor"
+                            />
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     </Link>
                   ))}
                 </div>

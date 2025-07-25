@@ -26,28 +26,28 @@ export function PlaylistCard({
   return (
     <Link href={`/playlist/${id}`}>
       <div
-        className={`group relative rounded-lg bg-card border border-border hover:bg-muted/30 card-hover ${className}`}>
-        <div className="p-3 flex items-center gap-3">
-          {/* Icon */}
-          <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Music className="w-5 h-5 text-primary" />
+        className={`group relative rounded bg-card border border-border hover:bg-muted/30 card-hover ${className}`}>
+        <div className="p-2 flex items-center gap-2">
+          {/* Compact Icon */}
+          <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Music className="w-4 h-4 text-primary" />
           </div>
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+            <h3 className="font-medium text-foreground group-hover:text-primary transition-colors truncate text-sm">
               {name}
             </h3>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-0.5">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {songCount > 0 && <span>{songCount} tracks</span>}
               {duration && <span>{duration}</span>}
               {date && <span>{formatDate(date)}</span>}
             </div>
           </div>
 
-          {/* Play indicator */}
+          {/* Compact play indicator */}
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <Play className="w-4 h-4 text-primary" fill="currentColor" />
+            <Play className="w-3 h-3 text-primary" fill="currentColor" />
           </div>
         </div>
       </div>

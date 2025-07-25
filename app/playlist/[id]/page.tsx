@@ -74,22 +74,22 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
+      {/* Compact Header */}
       <div className="border-b bg-card">
-        <div className="container mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-3 py-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Link href="/">
-                <Button variant="ghost" size="sm" className="h-8 gap-1">
+                <Button variant="ghost" size="sm" className="h-7 gap-1 px-2">
                   <ArrowLeft className="w-3 h-3" />
                   Back
                 </Button>
               </Link>
               <div>
-                <h1 className="text-xl font-semibold gradient-text">
+                <h1 className="text-lg font-semibold gradient-text">
                   {playlist.name}
                 </h1>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span>{playlist.songs.length} tracks</span>
                   <span>{uniqueArtists.length} artists</span>
                   <span>{formatDuration(totalDuration)}</span>
@@ -103,7 +103,7 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
                   Spotify
                 </SpotifyLink>
               )}
-              <Button size="sm" className="bg-primary text-white">
+              <Button size="sm" className="bg-primary text-white h-7">
                 <Play className="w-3 h-3 mr-1" fill="currentColor" />
                 Play
               </Button>
@@ -112,86 +112,103 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-          {/* Track List */}
-          <div className="xl:col-span-3">
-            <div className="space-y-1">
+      {/* Compact Content with Sidebar */}
+      <div className="max-w-7xl mx-auto px-3 py-2">
+        <div className="flex gap-4">
+          {/* Main Track List - Takes most of the space */}
+          <div className="flex-1">
+            {/* Compact table-like header */}
+            <div className="flex items-center text-xs text-muted-foreground font-medium py-1 px-2 border-b mb-1">
+              <div className="w-8">#</div>
+              <div className="flex-1">Track</div>
+              <div className="w-32">Artist</div>
+              <div className="w-32">Album</div>
+              <div className="w-20">Genre</div>
+              <div className="w-16 text-right">Time</div>
+              <div className="w-8"></div>
+            </div>
+
+            {/* Compact track rows */}
+            <div className="space-y-0">
               {playlist.songs.map((song, index) => (
                 <div
                   key={song.id}
-                  className="group p-2 rounded hover:bg-muted/30 transition-colors">
-                  <div className="flex items-center gap-3">
-                    {/* Track Number */}
-                    <div className="w-6 text-center">
-                      <span className="text-xs text-muted-foreground group-hover:hidden">
-                        {index + 1}
-                      </span>
-                      <Play
-                        className="w-3 h-3 text-primary hidden group-hover:block"
-                        fill="currentColor"
-                      />
-                    </div>
+                  className="group px-2 py-1 rounded text-sm hover:bg-muted/30 transition-colors flex items-center">
+                  {/* Track Number */}
+                  <div className="w-8 text-center">
+                    <span className="text-xs text-muted-foreground group-hover:hidden">
+                      {index + 1}
+                    </span>
+                    <Play
+                      className="w-3 h-3 text-primary hidden group-hover:block"
+                      fill="currentColor"
+                    />
+                  </div>
 
-                    {/* Track Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm text-foreground group-hover:text-primary transition-colors truncate">
-                        {song.name}
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span>{song.artist.name}</span>
-                        {song.album && <span>{song.album.name}</span>}
-                        {song.genre && (
-                          <span className="text-primary">
-                            {song.genre.name}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                  {/* Track Name */}
+                  <div className="flex-1 min-w-0 font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                    {song.name}
+                  </div>
 
-                    {/* Duration & Actions */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground tabular-nums">
-                        {typeof song.duration === "string"
-                          ? formatDuration(parseInt(song.duration) || 0)
-                          : formatDuration(song.duration || 0)}
-                      </span>
-                      {song.url && (
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <SpotifyLink
-                            url={song.url}
-                            size="icon"
-                            variant="ghost">
-                            <ExternalLink className="w-3 h-3" />
-                          </SpotifyLink>
-                        </div>
-                      )}
-                    </div>
+                  {/* Artist */}
+                  <div className="w-32 text-muted-foreground truncate">
+                    {song.artist.name}
+                  </div>
+
+                  {/* Album */}
+                  <div className="w-32 text-muted-foreground truncate">
+                    {song.album?.name || "-"}
+                  </div>
+
+                  {/* Genre */}
+                  <div className="w-20 text-primary text-xs truncate">
+                    {song.genre?.name || "-"}
+                  </div>
+
+                  {/* Duration */}
+                  <div className="w-16 text-right text-muted-foreground text-xs tabular-nums">
+                    {typeof song.duration === "string"
+                      ? formatDuration(parseInt(song.duration) || 0)
+                      : formatDuration(song.duration || 0)}
+                  </div>
+
+                  {/* Spotify Link */}
+                  <div className="w-8">
+                    {song.url && (
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <SpotifyLink
+                          url={song.url}
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6">
+                          <ExternalLink className="w-3 h-3" />
+                        </SpotifyLink>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-4">
+          {/* Compact Sidebar */}
+          <div className="w-64 space-y-2">
             {/* Artists */}
-            <div className="bg-card border rounded-lg p-3">
-              <h3 className="font-medium text-sm mb-2">
+            <div className="bg-card border rounded p-2">
+              <h3 className="font-medium text-xs mb-1 text-muted-foreground uppercase tracking-wide">
                 Artists ({uniqueArtists.length})
               </h3>
-              <div className="space-y-1">
-                {uniqueArtists.slice(0, 10).map((artist) => (
+              <div className="space-y-0">
+                {uniqueArtists.slice(0, 12).map((artist) => (
                   <div
                     key={artist}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                    className="text-xs text-foreground hover:text-primary transition-colors cursor-pointer py-0.5 truncate">
                     {artist}
                   </div>
                 ))}
-                {uniqueArtists.length > 10 && (
-                  <div className="text-xs text-muted-foreground">
-                    +{uniqueArtists.length - 10} more
+                {uniqueArtists.length > 12 && (
+                  <div className="text-xs text-muted-foreground pt-1">
+                    +{uniqueArtists.length - 12} more
                   </div>
                 )}
               </div>
@@ -199,13 +216,15 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
 
             {/* Genres */}
             {uniqueGenres.length > 0 && (
-              <div className="bg-card border rounded-lg p-3">
-                <h3 className="font-medium text-sm mb-2">Genres</h3>
+              <div className="bg-card border rounded p-2">
+                <h3 className="font-medium text-xs mb-1 text-muted-foreground uppercase tracking-wide">
+                  Genres
+                </h3>
                 <div className="flex flex-wrap gap-1">
                   {uniqueGenres.map((genre) => (
                     <span
                       key={genre}
-                      className="text-xs bg-muted px-2 py-1 rounded">
+                      className="text-xs bg-muted px-1.5 py-0.5 rounded">
                       {genre}
                     </span>
                   ))}
@@ -213,22 +232,33 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
               </div>
             )}
 
-            {/* Stats */}
-            <div className="bg-card border rounded-lg p-3">
-              <h3 className="font-medium text-sm mb-2">Stats</h3>
-              <div className="space-y-1 text-xs text-muted-foreground">
-                <div>
-                  Avg track:{" "}
-                  {Math.round(totalDuration / playlist.songs.length) || 0}s
+            {/* Compact Stats */}
+            <div className="bg-card border rounded p-2">
+              <h3 className="font-medium text-xs mb-1 text-muted-foreground uppercase tracking-wide">
+                Stats
+              </h3>
+              <div className="space-y-0 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Avg track:</span>
+                  <span className="font-medium">
+                    {Math.round(totalDuration / playlist.songs.length) || 0}s
+                  </span>
                 </div>
-                <div>
-                  Tracks/artist:{" "}
-                  {Math.round(
-                    (playlist.songs.length / uniqueArtists.length) * 10,
-                  ) / 10 || 0}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tracks/artist:</span>
+                  <span className="font-medium">
+                    {Math.round(
+                      (playlist.songs.length / uniqueArtists.length) * 10,
+                    ) / 10 || 0}
+                  </span>
                 </div>
                 {playlist.date && (
-                  <div>Created: {new Date(playlist.date).getFullYear()}</div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Created:</span>
+                    <span className="font-medium">
+                      {new Date(playlist.date).getFullYear()}
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
