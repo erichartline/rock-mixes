@@ -1,36 +1,31 @@
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { SpotifyLink } from "@/components/spotify-link"
+import { notFound } from "next/navigation"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Music,
+  Play,
+  User,
+  Disc,
+  ExternalLink,
+  Share2,
+} from "lucide-react"
+import { SpotifyLink } from "@/components/spotify-link"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import prisma from "../../../lib/prisma"
-import { Metadata } from "next"
 import { formatDate, formatDuration } from "@/lib/utils"
 
-type Props = {
-  params: { id: string }
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const playlist = await getPlaylist(params.id)
-  return {
-    title: `${playlist?.name || "Playlist"} | Rock Mixes`,
-    description: `Details for playlist ${playlist?.name || "Unknown"}`,
+interface PlaylistPageProps {
+  params: {
+    id: string
   }
 }
 
-async function getPlaylist(id: string) {
+async function getPlaylist(id: number) {
   const playlist = await prisma.playlist.findUnique({
-    where: {
-      id: Number(id),
-    },
+    where: { id },
     include: {
       songs: {
         include: {
@@ -39,156 +34,205 @@ async function getPlaylist(id: string) {
           genre: true,
         },
         orderBy: {
-          track: "asc",
+          name: "asc",
         },
       },
     },
   })
+  return playlist
+}
 
-  if (!playlist) return null
+export default async function PlaylistPage({ params }: PlaylistPageProps) {
+  const id = parseInt(params.id)
 
-  return {
-    ...playlist,
-    songs: playlist.songs.map((song) => ({
-      id: song.id,
-      title: song.name,
-      artist: song.artist.name,
-      album: song.album?.name || null,
-      genre: song.genre?.name || null,
-      trackNumber: song.track,
-      duration: song.duration,
-      url: song.url,
-      year: song.album?.year || null,
-    })),
+  if (isNaN(id)) {
+    notFound()
   }
-}
 
-export async function generateStaticParams() {
-  const playlists = await prisma.playlist.findMany({
-    select: {
-      id: true,
-    },
-  })
-
-  return playlists.map((playlist) => ({
-    id: String(playlist.id),
-  }))
-}
-
-export default async function PlaylistPage({ params }: Props) {
-  const playlist = await getPlaylist(params.id)
+  const playlist = await getPlaylist(id)
 
   if (!playlist) {
-    return (
-      <div className="container mx-auto py-10">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Playlist not found
-          </h1>
-          <Link href="/">
-            <Button className="mt-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-      </div>
-    )
+    notFound()
   }
 
-  const totalDuration = playlist.songs.reduce((total, song) => {
+  // Calculate total duration
+  const totalDuration = playlist.songs.reduce((sum, song) => {
     const duration =
       typeof song.duration === "string"
         ? parseInt(song.duration) || 0
         : song.duration || 0
-    return total + duration
+    return sum + duration
   }, 0)
 
-  return (
-    <div className="container mx-auto py-10">
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Link href="/">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
-          {playlist.url && (
-            <SpotifyLink url={playlist.url} size="sm">
-              Open Playlist in Spotify
-            </SpotifyLink>
-          )}
-        </div>
+  const uniqueArtists = Array.from(
+    new Set(playlist.songs.map((song) => song.artist.name)),
+  )
 
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">{playlist.name}</h1>
-          <div className="flex gap-4 text-muted-foreground">
-            <span>
-              Created: {playlist.date ? formatDate(playlist.date) : "Unknown"}
-            </span>
-            <span>•</span>
-            <span>{playlist.songs.length} tracks</span>
-            {totalDuration > 0 && (
-              <>
-                <span>•</span>
-                <span>{formatDuration(totalDuration)}</span>
-              </>
-            )}
+  const uniqueGenres = Array.from(
+    new Set(playlist.songs.map((song) => song.genre?.name).filter(Boolean)),
+  )
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="h-8 gap-1">
+                  <ArrowLeft className="w-3 h-3" />
+                  Back
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-xl font-semibold gradient-text">
+                  {playlist.name}
+                </h1>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>{playlist.songs.length} tracks</span>
+                  <span>{uniqueArtists.length} artists</span>
+                  <span>{formatDuration(totalDuration)}</span>
+                  {playlist.date && <span>{formatDate(playlist.date)}</span>}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {playlist.url && (
+                <SpotifyLink url={playlist.url} size="sm" variant="outline">
+                  Spotify
+                </SpotifyLink>
+              )}
+              <Button size="sm" className="bg-primary text-white">
+                <Play className="w-3 h-3 mr-1" fill="currentColor" />
+                Play
+              </Button>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-16">#</TableHead>
-                <TableHead>Song</TableHead>
-                <TableHead>Artist</TableHead>
-                <TableHead>Album</TableHead>
-                <TableHead>Genre</TableHead>
-                <TableHead>Year</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead className="w-32">Spotify</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {playlist.songs.map((song) => (
-                <TableRow key={song.id}>
-                  <TableCell className="font-medium">
-                    {song.trackNumber}
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">{song.title}</div>
-                  </TableCell>
-                  <TableCell>{song.artist}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {song.album || "Unknown"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {song.genre || "Unknown"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {song.year || "Unknown"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {song.duration
-                      ? formatDuration(
-                          typeof song.duration === "string"
-                            ? parseInt(song.duration) || 0
-                            : song.duration,
-                        )
-                      : "Unknown"}
-                  </TableCell>
-                  <TableCell>
-                    <SpotifyLink url={song.url} size="sm" variant="ghost">
-                      Play
-                    </SpotifyLink>
-                  </TableCell>
-                </TableRow>
+      {/* Content */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+          {/* Track List */}
+          <div className="xl:col-span-3">
+            <div className="space-y-1">
+              {playlist.songs.map((song, index) => (
+                <div
+                  key={song.id}
+                  className="group p-2 rounded hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center gap-3">
+                    {/* Track Number */}
+                    <div className="w-6 text-center">
+                      <span className="text-xs text-muted-foreground group-hover:hidden">
+                        {index + 1}
+                      </span>
+                      <Play
+                        className="w-3 h-3 text-primary hidden group-hover:block"
+                        fill="currentColor"
+                      />
+                    </div>
+
+                    {/* Track Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm text-foreground group-hover:text-primary transition-colors truncate">
+                        {song.name}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span>{song.artist.name}</span>
+                        {song.album && <span>{song.album.name}</span>}
+                        {song.genre && (
+                          <span className="text-primary">
+                            {song.genre.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Duration & Actions */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground tabular-nums">
+                        {typeof song.duration === "string"
+                          ? formatDuration(parseInt(song.duration) || 0)
+                          : formatDuration(song.duration || 0)}
+                      </span>
+                      {song.url && (
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <SpotifyLink
+                            url={song.url}
+                            size="icon"
+                            variant="ghost">
+                            <ExternalLink className="w-3 h-3" />
+                          </SpotifyLink>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Artists */}
+            <div className="bg-card border rounded-lg p-3">
+              <h3 className="font-medium text-sm mb-2">
+                Artists ({uniqueArtists.length})
+              </h3>
+              <div className="space-y-1">
+                {uniqueArtists.slice(0, 10).map((artist) => (
+                  <div
+                    key={artist}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                    {artist}
+                  </div>
+                ))}
+                {uniqueArtists.length > 10 && (
+                  <div className="text-xs text-muted-foreground">
+                    +{uniqueArtists.length - 10} more
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Genres */}
+            {uniqueGenres.length > 0 && (
+              <div className="bg-card border rounded-lg p-3">
+                <h3 className="font-medium text-sm mb-2">Genres</h3>
+                <div className="flex flex-wrap gap-1">
+                  {uniqueGenres.map((genre) => (
+                    <span
+                      key={genre}
+                      className="text-xs bg-muted px-2 py-1 rounded">
+                      {genre}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Stats */}
+            <div className="bg-card border rounded-lg p-3">
+              <h3 className="font-medium text-sm mb-2">Stats</h3>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <div>
+                  Avg track:{" "}
+                  {Math.round(totalDuration / playlist.songs.length) || 0}s
+                </div>
+                <div>
+                  Tracks/artist:{" "}
+                  {Math.round(
+                    (playlist.songs.length / uniqueArtists.length) * 10,
+                  ) / 10 || 0}
+                </div>
+                {playlist.date && (
+                  <div>Created: {new Date(playlist.date).getFullYear()}</div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

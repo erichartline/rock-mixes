@@ -1,25 +1,28 @@
 import Link from "next/link"
+import { PlaylistCard } from "@/components/playlist-card"
 import { SearchWrapper } from "@/components/search-wrapper"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { BarChart3, Music, Search, TrendingUp } from "lucide-react"
 import prisma from "../lib/prisma"
-import { formatDate, formatDuration } from "@/lib/utils"
+import { formatDate } from "@/lib/utils"
 
 interface Playlist {
   id: number
   name: string
   date: Date | null
   duration: string | null
+  _count?: {
+    songs: number
+  }
 }
 
 async function getPlaylists(): Promise<Playlist[]> {
   const playlists = await prisma.playlist.findMany({
+    include: {
+      _count: {
+        select: { songs: true },
+      },
+    },
     orderBy: {
       date: "desc",
     },
@@ -27,51 +30,95 @@ async function getPlaylists(): Promise<Playlist[]> {
   return playlists
 }
 
+async function getStats() {
+  const [totalPlaylists, totalSongs, totalArtists] = await Promise.all([
+    prisma.playlist.count(),
+    prisma.song.count(),
+    prisma.artist.count(),
+  ])
+  return { totalPlaylists, totalSongs, totalArtists }
+}
+
 export default async function HomePage() {
-  const playlists = await getPlaylists()
+  const [playlists, stats] = await Promise.all([getPlaylists(), getStats()])
+
+  const recentPlaylists = playlists.slice(0, 3)
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex flex-col items-center space-y-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-            Rock Mixes
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Browse and discover your rock music playlists
-          </p>
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold gradient-text">Rock Mixes</h1>
+              <div className="flex items-center gap-6 text-sm text-muted-foreground mt-1">
+                <span>{stats.totalPlaylists} playlists</span>
+                <span>{stats.totalSongs} tracks</span>
+                <span>{stats.totalArtists} artists</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <SearchWrapper className="w-80" placeholder="Search..." />
+              <Link href="/analytics">
+                <Button variant="outline" size="sm">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Analytics
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 py-6">
+        {/* All Playlists */}
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold mb-3">All Playlists</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {playlists.map((playlist) => (
+              <PlaylistCard
+                key={playlist.id}
+                id={playlist.id}
+                name={playlist.name}
+                date={playlist.date}
+                duration={playlist.duration}
+                songCount={playlist._count?.songs || 0}
+              />
+            ))}
+          </div>
         </div>
 
-        <SearchWrapper className="w-full max-w-md" />
-
-        <div className="w-full">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Duration</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {playlists.map((playlist) => (
-                <TableRow key={playlist.id}>
-                  <TableCell>
-                    <Link
-                      href={`/playlist/${playlist.id}`}
-                      className="font-medium text-primary hover:underline">
-                      {playlist.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    {playlist.date ? formatDate(playlist.date) : "Unknown"}
-                  </TableCell>
-                  <TableCell>{playlist.duration || "Unknown"}</TableCell>
-                </TableRow>
+        {/* Recent Activity */}
+        {recentPlaylists.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-3">Recently Added</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              {recentPlaylists.map((playlist) => (
+                <Link key={playlist.id} href={`/playlist/${playlist.id}`}>
+                  <div className="group p-3 rounded border border-border hover:bg-muted/30 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Music className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-foreground group-hover:text-primary transition-colors truncate text-sm">
+                          {playlist.name}
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          {playlist.date
+                            ? formatDate(playlist.date)
+                            : "Unknown date"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
               ))}
-            </TableBody>
-          </Table>
-        </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

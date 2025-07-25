@@ -1,13 +1,22 @@
 import "./globals.css"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Outfit } from "next/font/google"
+import { Navigation } from "@/components/navigation"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+})
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+})
 
 export const metadata: Metadata = {
   title: "Rock Mixes",
   description:
-    "A Next.js web application for browsing and managing rock music playlists",
+    "A Next.js web application for browsing and managing rock music playlists with enhanced search, analytics, and Spotify integration.",
 }
 
 export default function RootLayout({
@@ -16,10 +25,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
       <body className={inter.className}>
         <div className="min-h-screen bg-background font-sans antialiased">
-          {children}
+          <Navigation />
+          <main className="pb-8">{children}</main>
         </div>
       </body>
     </html>
