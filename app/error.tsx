@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { Button, Center, Flex, Heading, Text } from "@chakra-ui/react"
+import { Button } from "@/components/ui/button"
 import { useEffect } from "react"
 
 export default function Error({
@@ -16,21 +16,22 @@ export default function Error({
   }, [error])
 
   return (
-    <Center py="10">
-      <Flex direction="column" justify="center" align="center" gap={4}>
-        <Heading as="h2" size="xl">
+    <div className="container mx-auto py-10">
+      <div className="flex flex-col items-center justify-center text-center space-y-4">
+        <h2 className="text-3xl font-bold tracking-tight">
           Something went wrong!
-        </Heading>
-        <Text>An error occurred while loading this page.</Text>
+        </h2>
+        <p className="text-muted-foreground">
+          An error occurred while loading this page.
+        </p>
         <Button
           onClick={
             // Attempt to recover by trying to re-render the segment
             () => reset()
-          }
-        >
+          }>
           Try again
         </Button>
-      </Flex>
-    </Center>
+      </div>
+    </div>
   )
 }

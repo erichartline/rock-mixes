@@ -1,9 +1,13 @@
-import { ChakraProvider } from "@chakra-ui/react"
-import type { Metadata } from 'next'
+import "./globals.css"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: 'Rock Mixes',
-  description: 'A Next.js web application for browsing and managing rock music playlists',
+  title: "Rock Mixes",
+  description:
+    "A Next.js web application for browsing and managing rock music playlists",
 }
 
 export default function RootLayout({
@@ -13,10 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <ChakraProvider>
+      <body className={inter.className}>
+        <div className="min-h-screen bg-background font-sans antialiased">
           {children}
-        </ChakraProvider>
+        </div>
       </body>
     </html>
   )

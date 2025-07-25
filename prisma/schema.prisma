@@ -15,6 +15,8 @@ model Playlist {
   notes    String?
   url      String?
   songs    Song[]
+
+  @@index([name])
 }
 
 model Artist {
@@ -23,13 +25,15 @@ model Artist {
   songs  Song[]
   albums Album[]
   genres Genre[] @relation("ArtistToGenre")
+
+  @@index([name])
 }
 
 model Song {
   id         Int      @id @default(autoincrement())
   track      Int // Track number
   name       String // Name of the song
-  duration   String
+  duration   String // Duration as string
   url        String?
   album      Album?   @relation(fields: [albumId], references: [id])
   albumId    Int?
@@ -39,6 +43,11 @@ model Song {
   genreId    Int
   playlist   Playlist @relation(fields: [playlistId], references: [id])
   playlistId Int
+
+  @@index([name])
+  @@index([artistId])
+  @@index([genreId])
+  @@index([playlistId])
 }
 
 model Album {
@@ -50,6 +59,8 @@ model Album {
   songs    Song[]
 
   @@unique([name, artistId])
+  @@index([name])
+  @@index([year])
 }
 
 model Genre {
@@ -57,4 +68,6 @@ model Genre {
   name    String   @unique
   songs   Song[]
   artists Artist[] @relation("ArtistToGenre")
+
+  @@index([name])
 }

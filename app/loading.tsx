@@ -1,20 +1,12 @@
-import { Center, Flex, Heading, Spinner } from "@chakra-ui/react"
+import { Loader2 } from "lucide-react"
 
 export default function Loading() {
   return (
-    <Center py="10">
-      <Flex direction="column" justify="center" align="center" gap={4}>
-        <Heading as="h2" size="xl">
-          Loading...
-        </Heading>
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Flex>
-    </Center>
+    <div className="container mx-auto py-10">
+      <div className="flex flex-col items-center justify-center text-center space-y-4">
+        <h2 className="text-3xl font-bold tracking-tight">Loading...</h2>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    </div>
   )
 }
