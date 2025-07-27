@@ -10,7 +10,7 @@ interface PlaylistCardProps {
   id: number
   name: string
   date: Date | null
-  duration: string | null
+  duration: number | null
   songCount?: number
   className?: string
 }
@@ -40,7 +40,7 @@ export function PlaylistCard({
             </h3>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {songCount > 0 && <span>{songCount} tracks</span>}
-              {duration && <span>{duration}</span>}
+              {duration && <span>{formatDuration(duration)}</span>}
               {date && <span>{formatDate(date)}</span>}
             </div>
           </div>

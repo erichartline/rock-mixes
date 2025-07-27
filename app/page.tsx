@@ -10,7 +10,7 @@ interface Playlist {
   id: number
   name: string
   date: Date | null
-  duration: string | null
+  duration: number | null
   _count?: {
     songs: number
   }

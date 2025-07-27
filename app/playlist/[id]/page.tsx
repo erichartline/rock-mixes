@@ -57,11 +57,7 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
 
   // Calculate total duration
   const totalDuration = playlist.songs.reduce((sum, song) => {
-    const duration =
-      typeof song.duration === "string"
-        ? parseInt(song.duration) || 0
-        : song.duration || 0
-    return sum + duration
+    return sum + (song.duration || 0)
   }, 0)
 
   const uniqueArtists = Array.from(
@@ -167,9 +163,7 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
 
                   {/* Duration */}
                   <div className="w-16 text-right text-muted-foreground text-xs tabular-nums">
-                    {typeof song.duration === "string"
-                      ? formatDuration(parseInt(song.duration) || 0)
-                      : formatDuration(song.duration || 0)}
+                    {formatDuration(song.duration || 0)}
                   </div>
 
                   {/* Spotify Link */}

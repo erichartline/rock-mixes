@@ -20,7 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import prisma from "../../lib/prisma"
-import { formatDate } from "@/lib/utils"
+import { formatDate, formatDuration } from "@/lib/utils"
 
 interface SearchPageProps {
   searchParams: {
@@ -33,7 +33,7 @@ interface SearchResults {
     id: number
     name: string
     date: Date | null
-    duration: string | null
+    duration: number | null
   }>
   songs: Array<{
     id: number
@@ -178,7 +178,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                               {playlist.name}
                             </h3>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>{playlist.duration || "Unknown"}</span>
+                              <span>
+                                {playlist.duration
+                                  ? formatDuration(playlist.duration)
+                                  : "Unknown"}
+                              </span>
                               {playlist.date && (
                                 <span>{formatDate(playlist.date)}</span>
                               )}

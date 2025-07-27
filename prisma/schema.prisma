@@ -11,7 +11,7 @@ model Playlist {
   id       Int       @id @default(autoincrement())
   name     String    @unique
   date     DateTime? // This assumes date is optional
-  duration String
+  duration Int // Duration in milliseconds
   notes    String?
   url      String?
   songs    Song[]
@@ -33,7 +33,7 @@ model Song {
   id         Int      @id @default(autoincrement())
   track      Int // Track number
   name       String // Name of the song
-  duration   String // Duration as string
+  duration   Int // Duration in milliseconds
   url        String?
   album      Album?   @relation(fields: [albumId], references: [id])
   albumId    Int?
