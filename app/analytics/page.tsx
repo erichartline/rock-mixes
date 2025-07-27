@@ -27,6 +27,11 @@ import {
   getDecadeDistribution,
   getPlaylistStats,
 } from "../../lib/analytics"
+import {
+  ArtistFrequencyChart,
+  GenreDistributionChart,
+  TimelineChart,
+} from "@/components/charts"
 
 export default async function AnalyticsPage() {
   const [
@@ -45,8 +50,6 @@ export default async function AnalyticsPage() {
     getPlaylistStats(),
   ])
 
-  const topArtists = artistFrequency.slice(0, 8)
-  const topGenres = genreDistribution.slice(0, 6)
   const topDecades = decadeDistribution.slice(0, 5)
 
   return (
@@ -130,65 +133,32 @@ export default async function AnalyticsPage() {
       <section className="container mx-auto px-4 py-12">
         <div className="space-y-12">
           {/* Top Artists */}
-          <div>
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-3xl font-bold font-outfit mb-2">
-                  Top Artists
-                </h2>
-                <p className="text-muted-foreground">
-                  Most featured artists in your collection
-                </p>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-3xl font-bold font-outfit">
+                    <Users className="w-6 h-6 text-primary" />
+                    Top Artists
+                  </CardTitle>
+                  <CardDescription className="text-base mt-2">
+                    Most featured artists in your collection
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="gap-1">
+                  <Users className="w-3 h-3" />
+                  {artistFrequency.length} total
+                </Badge>
               </div>
-              <Badge variant="outline" className="gap-1">
-                <Users className="w-3 h-3" />
-                {artistFrequency.length} total
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {topArtists.map((artist, index) => (
-                <Card key={artist.name} className="card-hover group">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
-                          <Users className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
-                          {index + 1}
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-                          {artist.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {artist.count} tracks
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-primary to-pink-500 h-2 rounded-full transition-all duration-500"
-                          style={{
-                            width: `${
-                              (artist.count / topArtists[0].count) * 100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+            </CardHeader>
+            <CardContent>
+              <ArtistFrequencyChart data={artistFrequency.slice(0, 10)} />
+            </CardContent>
+          </Card>
 
           {/* Genres & Timeline */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-            {/* Top Genres */}
+            {/* Genre Distribution */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -206,25 +176,8 @@ export default async function AnalyticsPage() {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {topGenres.map((genre, index) => (
-                  <div key={genre.name} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm">{genre.name}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {genre.count} tracks
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-primary to-pink-500 h-2 rounded-full transition-all duration-500"
-                        style={{
-                          width: `${(genre.count / topGenres[0].count) * 100}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
+              <CardContent>
+                <GenreDistributionChart data={genreDistribution} />
               </CardContent>
             </Card>
 
@@ -237,20 +190,8 @@ export default async function AnalyticsPage() {
                 </CardTitle>
                 <CardDescription>Playlist creation over time</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {timelineData.slice(0, 6).map((item) => (
-                  <div
-                    key={item.period}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-pink-500 flex items-center justify-center">
-                        <Calendar className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="font-medium">{item.period}</span>
-                    </div>
-                    <Badge variant="outline">{item.playlists} playlists</Badge>
-                  </div>
-                ))}
+              <CardContent>
+                <TimelineChart data={timelineData} variant="area" />
               </CardContent>
             </Card>
           </div>

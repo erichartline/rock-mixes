@@ -1,5 +1,5 @@
 import prisma from "./prisma"
-import { getDecadeFromYear, groupByProperty, parseDuration } from "./utils"
+import { getDecadeFromYear, groupByProperty } from "./utils"
 
 export interface ArtistFrequencyData {
   name: string
@@ -153,14 +153,12 @@ export async function getDurationStats(): Promise<DurationStats> {
     select: { duration: true },
     where: {
       duration: {
-        not: "",
+        gt: 0,
       },
     },
   })
 
-  const durations = songs
-    .map((s) => parseDuration(s.duration || ""))
-    .filter((d): d is number => d > 0)
+  const durations = songs.map((s) => s.duration || 0).filter((d) => d > 0)
 
   if (durations.length === 0) {
     return {
