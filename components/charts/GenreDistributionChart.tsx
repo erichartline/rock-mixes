@@ -31,7 +31,7 @@ export function GenreDistributionChart({
     )
   }
 
-  const handleCellClick = (data: any, index: number) => {
+  const handleCellClick = (data: any) => {
     if (onGenreClick && data) {
       onGenreClick(data)
     }
@@ -54,17 +54,17 @@ export function GenreDistributionChart({
 
   const CustomLegend = ({ payload }: any) => {
     return (
-      <div className="flex flex-wrap gap-2 justify-center mt-4">
+      <div className="flex flex-wrap chart-legend justify-center mt-3">
         {payload?.map((entry: any, index: number) => (
           <div
             key={index}
-            className="flex items-center gap-1 text-xs cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => handleCellClick(entry.payload, index)}>
+            className="flex items-center gap-1 text-xs cursor-pointer hover:opacity-80 transition-opacity px-1 py-0.5"
+            onClick={() => handleCellClick(entry.payload)}>
             <div
-              className="w-3 h-3 rounded-sm"
+              className="w-2.5 h-2.5 rounded-sm flex-shrink-0"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-muted-foreground truncate max-w-[80px]">
+            <span className="text-muted-foreground truncate max-w-[70px] text-[10px]">
               {entry.value}
             </span>
           </div>
@@ -74,7 +74,7 @@ export function GenreDistributionChart({
   }
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`chart-container ${className}`}>
       <ResponsiveContainer width="100%" height={400}>
         <PieChart>
           <Pie

@@ -24,6 +24,14 @@
     --input: 240 5.9% 90%;
     --ring: 220 91% 50%;
     --radius: 0.375rem;
+
+    /* Chart colors */
+    --chart-primary: 220 91% 50%;
+    --chart-secondary: 240 3.8% 46.1%;
+    --chart-accent: 210 100% 70%;
+    --chart-muted: 240 5.9% 90%;
+    --chart-grid: 240 5.9% 90%;
+    --chart-text: 240 3.8% 46.1%;
   }
 
   .dark {
@@ -46,6 +54,14 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 220 91% 50%;
+
+    /* Chart colors */
+    --chart-primary: 220 91% 50%;
+    --chart-secondary: 240 5% 64.9%;
+    --chart-accent: 210 100% 75%;
+    --chart-muted: 240 3.7% 15.9%;
+    --chart-grid: 240 3.7% 15.9%;
+    --chart-text: 240 5% 64.9%;
   }
 }
 
@@ -103,5 +119,25 @@
 
   .card-hover:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Chart components */
+  .chart-container {
+    min-height: 300px;
+    width: 100%;
+  }
+
+  .chart-legend {
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .chart-tooltip {
+    background: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) - 2px);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    padding: 0.75rem;
   }
 }

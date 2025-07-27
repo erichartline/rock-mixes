@@ -82,17 +82,19 @@ export async function getGenreDistribution(): Promise<GenreDistributionData[]> {
   })
 
   const totalSongs = await prisma.song.count()
+
+  // Theme-aware colors using HSL values that work well in light and dark themes
   const colors = [
-    "#8884d8",
-    "#82ca9d",
-    "#ffc658",
-    "#ff7c7c",
-    "#8dd1e1",
-    "#d084d0",
-    "#ffb347",
-    "#87ceeb",
-    "#dda0dd",
-    "#98fb98",
+    "hsl(220, 91%, 50%)", // Primary blue
+    "hsl(142, 71%, 45%)", // Green
+    "hsl(38, 92%, 58%)", // Orange
+    "hsl(0, 84%, 70%)", // Red
+    "hsl(199, 69%, 65%)", // Light blue
+    "hsl(280, 65%, 60%)", // Purple
+    "hsl(25, 95%, 63%)", // Orange-red
+    "hsl(204, 96%, 78%)", // Sky blue
+    "hsl(300, 56%, 75%)", // Light purple
+    "hsl(120, 93%, 79%)", // Light green
   ]
 
   const genresWithNames = await Promise.all(

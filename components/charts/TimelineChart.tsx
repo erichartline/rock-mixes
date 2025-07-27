@@ -50,7 +50,7 @@ export function TimelineChart({
         <div className="bg-background border border-border rounded-lg shadow-lg p-3">
           <p className="font-semibold text-foreground">{label}</p>
           <div className="space-y-1 text-sm">
-            <p style={{ color: "#3b82f6" }}>
+            <p style={{ color: "hsl(var(--chart-primary))" }}>
               {data.playlists} playlist{data.playlists !== 1 ? "s" : ""}
             </p>
             <p className="text-muted-foreground">{data.songs} total tracks</p>
@@ -64,24 +64,28 @@ export function TimelineChart({
   const ChartComponent = variant === "area" ? AreaChart : LineChart
 
   return (
-    <div className={`w-full ${className}`}>
-      <ResponsiveContainer width="100%" height={300}>
+    <div className={`chart-container ${className}`}>
+      <ResponsiveContainer width="100%" height={400}>
         <ChartComponent
           data={data}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           onClick={handleClick}
           style={{ cursor: "pointer" }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="hsl(var(--chart-grid))"
+            opacity={0.3}
+          />
           <XAxis
             dataKey="period"
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            axisLine={{ stroke: "#e2e8f0" }}
-            tickLine={{ stroke: "#e2e8f0" }}
+            tick={{ fontSize: 11, fill: "hsl(var(--chart-text))" }}
+            axisLine={{ stroke: "hsl(var(--chart-grid))" }}
+            tickLine={{ stroke: "hsl(var(--chart-grid))" }}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            axisLine={{ stroke: "#e2e8f0" }}
-            tickLine={{ stroke: "#e2e8f0" }}
+            tick={{ fontSize: 11, fill: "hsl(var(--chart-text))" }}
+            axisLine={{ stroke: "hsl(var(--chart-grid))" }}
+            tickLine={{ stroke: "hsl(var(--chart-grid))" }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
@@ -91,8 +95,8 @@ export function TimelineChart({
               <Area
                 type="monotone"
                 dataKey="playlists"
-                stroke="#3b82f6"
-                fill="#3b82f6"
+                stroke="hsl(var(--chart-primary))"
+                fill="hsl(var(--chart-primary))"
                 fillOpacity={0.3}
                 strokeWidth={2}
                 name="Playlists"
@@ -100,8 +104,8 @@ export function TimelineChart({
               <Area
                 type="monotone"
                 dataKey="songs"
-                stroke="#64748b"
-                fill="#64748b"
+                stroke="hsl(var(--chart-secondary))"
+                fill="hsl(var(--chart-secondary))"
                 fillOpacity={0.1}
                 strokeWidth={1}
                 strokeDasharray="4 4"
@@ -113,12 +117,16 @@ export function TimelineChart({
               <Line
                 type="monotone"
                 dataKey="playlists"
-                stroke="#3b82f6"
+                stroke="hsl(var(--chart-primary))"
                 strokeWidth={3}
-                dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+                dot={{
+                  fill: "hsl(var(--chart-primary))",
+                  strokeWidth: 2,
+                  r: 4,
+                }}
                 activeDot={{
                   r: 6,
-                  stroke: "#3b82f6",
+                  stroke: "hsl(var(--chart-primary))",
                   strokeWidth: 2,
                 }}
                 name="Playlists"
@@ -126,17 +134,17 @@ export function TimelineChart({
               <Line
                 type="monotone"
                 dataKey="songs"
-                stroke="#64748b"
+                stroke="hsl(var(--chart-secondary))"
                 strokeWidth={2}
                 strokeDasharray="4 4"
                 dot={{
-                  fill: "#64748b",
+                  fill: "hsl(var(--chart-secondary))",
                   strokeWidth: 2,
                   r: 3,
                 }}
                 activeDot={{
                   r: 5,
-                  stroke: "#64748b",
+                  stroke: "hsl(var(--chart-secondary))",
                   strokeWidth: 2,
                 }}
                 name="Total Tracks"

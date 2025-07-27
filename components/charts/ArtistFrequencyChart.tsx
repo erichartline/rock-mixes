@@ -54,31 +54,35 @@ export function ArtistFrequencyChart({
   }
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`chart-container ${className}`}>
       <ResponsiveContainer width="100%" height={400}>
         <BarChart
           data={data}
           layout="horizontal"
           margin={{ top: 20, right: 30, left: 80, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="hsl(var(--chart-grid))"
+            opacity={0.3}
+          />
           <XAxis
             type="number"
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            axisLine={{ stroke: "#e2e8f0" }}
-            tickLine={{ stroke: "#e2e8f0" }}
+            tick={{ fontSize: 11, fill: "hsl(var(--chart-text))" }}
+            axisLine={{ stroke: "hsl(var(--chart-grid))" }}
+            tickLine={{ stroke: "hsl(var(--chart-grid))" }}
           />
           <YAxis
             type="category"
             dataKey="name"
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            axisLine={{ stroke: "#e2e8f0" }}
-            tickLine={{ stroke: "#e2e8f0" }}
+            tick={{ fontSize: 11, fill: "hsl(var(--chart-text))" }}
+            axisLine={{ stroke: "hsl(var(--chart-grid))" }}
+            tickLine={{ stroke: "hsl(var(--chart-grid))" }}
             width={70}
           />
           <Tooltip content={<CustomTooltip />} />
           <Bar
             dataKey="count"
-            fill="#3b82f6"
+            fill="hsl(var(--chart-primary))"
             radius={[0, 4, 4, 0]}
             onClick={handleBarClick}
             style={{ cursor: "pointer" }}
