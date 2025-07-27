@@ -19,7 +19,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import prisma from "../../lib/prisma"
+import {
+  searchAll,
+  validateSearchQuery,
+  type DetailedSearchResults,
+} from "../../lib/search"
 import { formatDate, formatDuration } from "@/lib/utils"
 
 interface SearchPageProps {
@@ -28,77 +32,19 @@ interface SearchPageProps {
   }
 }
 
-interface SearchResults {
-  playlists: Array<{
-    id: number
-    name: string
-    date: Date | null
-    duration: number | null
-  }>
-  songs: Array<{
-    id: number
-    name: string
-    artist: { name: string }
-    album: { name: string } | null
-    playlist: { id: number; name: string }
-  }>
-  artists: Array<{
-    id: number
-    name: string
-    _count: { songs: number }
-  }>
-}
+type SearchResults = DetailedSearchResults
 
 async function searchDatabase(query: string): Promise<SearchResults> {
-  if (!query.trim()) {
+  const validation = validateSearchQuery(query)
+  if (!validation.isValid) {
     return { playlists: [], songs: [], artists: [] }
   }
 
-  const searchTerm = query.toLowerCase()
-
-  const [playlists, songs, artists] = await Promise.all([
-    // Search playlists
-    prisma.playlist.findMany({
-      where: {
-        name: {
-          contains: searchTerm,
-        },
-      },
-      take: 10,
-    }),
-
-    // Search songs
-    prisma.song.findMany({
-      where: {
-        name: {
-          contains: searchTerm,
-        },
-      },
-      include: {
-        artist: true,
-        album: true,
-        playlist: true,
-      },
-      take: 20,
-    }),
-
-    // Search artists
-    prisma.artist.findMany({
-      where: {
-        name: {
-          contains: searchTerm,
-        },
-      },
-      include: {
-        _count: {
-          select: { songs: true },
-        },
-      },
-      take: 10,
-    }),
-  ])
-
-  return { playlists, songs, artists }
+  return await searchAll(query, {
+    playlists: 10,
+    songs: 20,
+    artists: 10,
+  })
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {

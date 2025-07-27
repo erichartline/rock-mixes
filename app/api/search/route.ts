@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import prisma from "../../../lib/prisma"
+import {
+  searchAll,
+  searchPlaylists,
+  searchSongs,
+  searchArtists,
+  validateSearchQuery,
+  getSearchSuggestions,
+} from "../../../lib/search"
 
 export const dynamic = "force-dynamic"
 
@@ -9,76 +16,75 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get("q")
     const type = searchParams.get("type") || "all"
     const limit = parseInt(searchParams.get("limit") || "10")
+    const suggestions = searchParams.get("suggestions") === "true"
 
-    if (!query || query.trim().length < 2) {
+    // Validate query
+    if (!query) {
       return NextResponse.json(
         {
-          error: "Query must be at least 2 characters long",
+          error: "Query parameter 'q' is required",
         },
         { status: 400 },
       )
     }
 
-    const searchTerm = query.toLowerCase().trim()
+    const validation = validateSearchQuery(query)
+    if (!validation.isValid) {
+      return NextResponse.json(
+        {
+          error: validation.error,
+        },
+        { status: 400 },
+      )
+    }
+
+    // Handle search suggestions
+    if (suggestions) {
+      const suggestionResults = await getSearchSuggestions(query, limit)
+      return NextResponse.json({ suggestions: suggestionResults })
+    }
 
     let results: any = {}
 
-    if (type === "all" || type === "playlists") {
-      results.playlists = await prisma.playlist.findMany({
-        where: {
-          name: {
-            contains: searchTerm,
-          },
-        },
-        select: {
-          id: true,
-          name: true,
-          date: true,
-          duration: true,
-        },
-        take: limit,
-      })
+    // Perform search based on type
+    switch (type) {
+      case "playlists":
+        results.playlists = await searchPlaylists(query, limit)
+        break
+
+      case "songs":
+        results.songs = await searchSongs(query, limit)
+        break
+
+      case "artists":
+        results.artists = await searchArtists(query, limit)
+        break
+
+      case "all":
+      default:
+        results = await searchAll(query, {
+          playlists: limit,
+          songs: limit,
+          artists: limit,
+        })
+        break
     }
 
-    if (type === "all" || type === "songs") {
-      results.songs = await prisma.song.findMany({
-        where: {
-          name: {
-            contains: searchTerm,
-          },
-        },
-        include: {
-          artist: {
-            select: { name: true },
-          },
-          album: {
-            select: { name: true },
-          },
-          playlist: {
-            select: { id: true, name: true },
-          },
-        },
-        take: limit,
-      })
+    // Add metadata about the search
+    const response = {
+      ...results,
+      metadata: {
+        query: validation.sanitized,
+        type,
+        limit,
+        totalResults:
+          (results.playlists?.length || 0) +
+          (results.songs?.length || 0) +
+          (results.artists?.length || 0),
+      },
     }
 
-    if (type === "all" || type === "artists") {
-      results.artists = await prisma.artist.findMany({
-        where: {
-          name: {
-            contains: searchTerm,
-          },
-        },
-        include: {
-          _count: {
-            select: { songs: true },
-          },
-        },
-        take: limit,
-      })
-    }
-
-    return NextResponse.json(results)
+    return NextResponse.json(response)
   } catch (error) {
     console.error("Search API error:", error)
     return NextResponse.json(
